@@ -1,0 +1,4 @@
+# authRouter
+ * signIn
+ * logIn
+ * logOut

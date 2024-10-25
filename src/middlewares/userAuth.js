@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const useAuth = async (req, res, next) => {
   try {
     const { Token } = req.cookies;
+
     if (!Token) {
       throw new Error("Invalid Token!");
     }
@@ -17,7 +18,7 @@ const useAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    res.status(400).send("Error : ", error.message);
+    res.status(400).send("Error : " + error.message);
   }
 };
 module.exports = { useAuth };
