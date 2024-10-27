@@ -20,4 +20,30 @@ const validateSignUp = async (req) => {
     throw new Error("User already present!");
   }
 };
-module.exports = { validateSignUp };
+const validateProfileEdit = (req) => {
+  const data = [
+    "firstName",
+    "lastName",
+    "email",
+    "skills",
+    "about",
+    "photoURL",
+    "age",
+    "gender",
+  ];
+  const isAllow = Object.keys(req.body).every((k) => {
+    return data.includes(k);
+  });
+  if (!isAllow) {
+    throw new Error("Extra Credentails !");
+  }
+  const { photoURL } = req.body;
+
+  if (photoURL) {
+    const isURL = validator.isURL(photoURL);
+    if (!isURL) {
+      throw new Error("Invalid URL Credentails !");
+    }
+  }
+};
+module.exports = { validateSignUp, validateProfileEdit };
