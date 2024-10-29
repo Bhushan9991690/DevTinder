@@ -12,7 +12,7 @@ requestRouter.post(
       const SenderUser = req.user;
       const { status, userId } = req.params;
       const link = new ConnectionRequest({
-        formUserId: SenderUser._id,
+        fromUserId: SenderUser._id,
         toUserId: userId,
         status: status,
       });
@@ -35,9 +35,9 @@ requestRouter.post(
 
       const isSendRequest = await ConnectionRequest.findOne({
         $or: [
-          { formUserId: SenderUser._id, toUserId: userId },
+          { fromUserId: SenderUser._id, toUserId: userId },
           {
-            formUserId: userId,
+            fromUserId: userId,
             toUserId: SenderUser._id,
           },
         ],
@@ -53,4 +53,35 @@ requestRouter.post(
     }
   }
 );
+requestRouter.post(
+  "/profile/review/:status/:requestId",
+  useAuth,
+  async (req, res) => {
+    try {
+      const user = req.user;
+      const { status, requestId } = req.params;
+      const allowedStatus = ["accepted", "rejected"];
+      if (!allowedStatus.includes(status)) {
+        return res.json({ message: "Invalid Status type" });
+      }
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        return res.json({ message: "Invalid requestId" });
+      }
+      const findRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: user._id,
+        status: "interested",
+      });
+      if (!findRequest) {
+        return res.json({ Message: "No request found!!" });
+      }
+      findRequest.status = "accepted";
+      await findRequest.save();
+      res.json({ message: findRequest });
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
+  }
+);
+requestRouter.post;
 module.exports = { requestRouter };

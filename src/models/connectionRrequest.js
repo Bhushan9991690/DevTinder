@@ -1,13 +1,15 @@
 const mongoose = require("mongoose");
 const userConnectionSchema = new mongoose.Schema(
   {
-    formUserId: {
+    fromUserId: {
       type: mongoose.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     toUserId: {
       type: mongoose.Types.ObjectId,
       required: true,
+      ref: "User",
     },
     status: {
       type: String,
@@ -22,11 +24,13 @@ const userConnectionSchema = new mongoose.Schema(
 
 userConnectionSchema.pre("save", async function (next) {
   const user = this;
-  if (user.formUserId.equals(user.toUserId)) {
+  if (user.fromUserId.equals(user.toUserId)) {
     throw new Error("Cannot sent request to Yourself");
   }
   next();
 });
+
+userConnectionSchema.index({ fromUserId: 1, toUserId: 1 });
 
 const ConnectionRequest = mongoose.model(
   "ConnectionRequest",
