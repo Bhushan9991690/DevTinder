@@ -66,6 +66,12 @@ userRouter.get("/feed", useAuth, async (req, res, next) => {
   // 3) All of ignored Profile
   // 4) All of pending Request
   try {
+    let page = parseInt(req.query.page) || 1;
+    let limit = parseInt(req.query.limit) || 10;
+    page = page < 1 ? 1 : page;
+    limit = limit > 50 ? 50 : limit;
+    const skip = (page - 1) * limit;
+
     const loggedIn = req.user._id;
     const getAllConnection = await ConnectionRequest.find({
       $or: [{ fromUserId: loggedIn }, { toUserId: loggedIn }],
@@ -84,15 +90,20 @@ userRouter.get("/feed", useAuth, async (req, res, next) => {
         },
         { _id: { $ne: loggedIn } },
       ],
-    }).select(details);
+    })
+      .select(details)
+      .skip(skip)
+      .limit(limit);
     if (users.length == 0) {
       return res.json({
-        message: "You connected all the users that found in Database!",
+        message: "Not found!",
       });
     }
+
     res.json({ data: users });
   } catch (error) {
     res.status(400).json({ Error: error.message });
   }
 });
+// mongoDB two main function skip() and limit()
 module.exports = { userRouter };
